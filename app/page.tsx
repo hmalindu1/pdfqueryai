@@ -1,3 +1,10 @@
+/* ================================================================================================ /
+ * Title : Home Page
+ * Description : Intro will be here
+ * Author : Hashan
+ * Date : March 8th, 2024 4:43 AM
+ /* ================================================================================================ */
+
 import MaxWIdthWrapper from '@/components/MaxWIdthWrapper'
 
 export default function Home() {
@@ -12,7 +19,11 @@ export default function Home() {
                 Chat with your{' '}
                 <span className="text-purple-600">documents</span> in seconds.
             </h1>
-            <p className='max-w-prose mt-5 text-zinc-700 sm:text-lg'>Quiz allows you to have conversations with any PDF document. Simply upload your file and start asking questions right away.</p>
+            <p className="max-w-prose mt-5 text-zinc-700 sm:text-lg">
+                Quiz allows you to have conversations with any PDF document.
+                Simply upload your file and start asking questions right away.
+            </p>
+
         </MaxWIdthWrapper>
     )
 }
