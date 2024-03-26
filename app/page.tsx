@@ -11,6 +11,11 @@ import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
+/**
+ * Renders the Home component with various sections including a welcome message, value proposition, feature section, and steps for using the app.
+ *
+ * @return {JSX.Element} The rendered Home component
+ */
 export default function Home() {
     return (
         <>
