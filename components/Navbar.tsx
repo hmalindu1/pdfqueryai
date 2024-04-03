@@ -45,7 +45,8 @@ const Navbar = () => {
                                     size: 'sm'
                                 })}
                             >
-                                Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                                Get Started{' '}
+                                <ArrowRight className="ml-2 h-4 w-4" />
                             </RegisterLink>
                         </>
                     </div>
