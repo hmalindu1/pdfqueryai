@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { trpc } from '@/app/_trpc/client'
 import { httpBatchLink } from '@trpc/client'
 
-/**
+/***
  * Component that provides the TRPC and QueryClient context to its children.
  *
  * @param {React.ReactNode} children - The children components to be wrapped by the Providers.
