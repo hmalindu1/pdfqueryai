@@ -2,13 +2,14 @@ import { db } from '@/db'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import { redirect } from 'next/navigation'
 import React from 'react'
+import  Dashboard  from '@/components/Dashboard'
 
 /**
  * Generates the Dashboard component asynchronously.
  *
  * @return {JSX.Element} The JSX element displaying the user's email within a div.
  */
-const Dashboard = async () => {
+const Page = async () => {
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
@@ -21,4 +22,4 @@ const Dashboard = async () => {
     return <Dashboard />
 }
 
-export default Dashboard
+export default Page
