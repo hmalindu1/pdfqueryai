@@ -10,6 +10,10 @@ import { format } from 'date-fns'
 import { Button } from './ui/button'
 
 const Dashboard = () => {
+    const [currentDelFile, setCurrentDelFile] = useState<string | null>(null)
+
+    const utils = trpc.useUtils()
+
     const { data: files, isLoading } = trpc.getUserFiles.useQuery()
 
     return (
