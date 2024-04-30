@@ -1,5 +1,11 @@
 import React from 'react'
 
+
+/**
+ * Renders the Dashboard component.
+ *
+ * @return {JSX.Element} The rendered Dashboard component
+ */
 const Dashboard = () => {
   return (
     <main className='mx-auto max-w-7xl md:p-10'>
