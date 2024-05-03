@@ -4,12 +4,42 @@ import { Dialog, DialogContent, DialogTrigger } from './ui/dialog'
 import { Button } from './ui/button'
 import Dropzone from 'react-dropzone'
 import { Cloud, File } from 'lucide-react'
+import { boolean } from 'zod'
+import { Progress } from './ui/progress'
 
 const UploadDropzone = () => {
+    const [isUploading, setIsUploading] = useState<boolean>(true)
+    const [uploadProgress, setUploadProgress] = useState<number>(0)
+
+    const startSimulatedProgress = () => {
+        setUploadProgress(0)
+
+        const interval = setInterval(() => {
+            setUploadProgress((prevProgress) => {
+                if (prevProgress >= 95) {
+                    clearInterval(interval)
+                    return prevProgress
+                }
+                return prevProgress + 5
+            })
+        }, 500)
+
+        return interval
+    }
+
     return (
         <Dropzone
             multiple={false}
-            onDrop={(acceptedFiles) => console.log(acceptedFiles)}
+            onDrop={(acceptedFiles) => {
+                setIsUploading(true)
+
+                const progressInterval = startSimulatedProgress()
+
+                //handle file upload
+
+                clearInterval(progressInterval)
+                setUploadProgress(100)
+            }}
         >
             {({ getRootProps, getInputProps, acceptedFiles }) => (
                 <div
@@ -39,9 +69,18 @@ const UploadDropzone = () => {
                                     <div className="px-3 py-2 h-full grid place-items-center">
                                         <File className="h-4 w-4 text-purple-500" />
                                     </div>
-                                    <div className='px-3 py-2 h-full text-sm truncate'>
-                                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores, voluptatem!
+                                    <div className="px-3 py-2 h-full text-sm truncate">
+                                        {acceptedFiles[0].name}
                                     </div>
+                                </div>
+                            ) : null}
+
+                            {isUploading ? (
+                                <div className="w-full mt-4 max-w-xs mx-auto">
+                                    <Progress
+                                        value={uploadProgress}
+                                        className="h-1 w-full bg-zinc-200"
+                                    />
                                 </div>
                             ) : null}
                         </label>
