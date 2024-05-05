@@ -11,6 +11,11 @@ import { useToast } from './ui/use-toast'
 import { trpc } from '@/app/_trpc/client'
 import { useRouter } from 'next/navigation'
 
+/**
+ * React component for handling file uploads with progress tracking and error handling.
+ *
+ * @return {JSX.Element} The JSX element for the file upload component.
+ */
 const UploadDropzone = () => {
     const [isUploading, setIsUploading] = useState<boolean>(false)
     const [uploadProgress, setUploadProgress] = useState<number>(0)
