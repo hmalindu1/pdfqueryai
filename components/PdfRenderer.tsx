@@ -10,6 +10,12 @@ interface PdfRendererProps {
     url: string
 }
 
+/**
+ * Renders a PDF document based on the provided URL.
+ *
+ * @param {string} url - The URL of the PDF file to render
+ * @return {JSX.Element} The rendered PDF document component
+ */
 const PdfRenderer = ({ url }: PdfRendererProps) => {
     return (
         <div className="w-full bg-white rounded-md shadow flex flex-col items-center">
