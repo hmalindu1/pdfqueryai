@@ -32,6 +32,13 @@ const UploadDropzone = () => {
         retryDelay: 500
     })
 
+    /**
+     * Starts a simulated progress interval that updates the upload progress state every 500 milliseconds.
+     * The progress value starts at 0 and increments by 5 until it reaches 95.
+     * Once the progress reaches 95, the interval is cleared.
+     *
+     * @return {number} The interval ID of the simulated progress interval.
+     */
     const startSimulatedProgress = () => {
         setUploadProgress(0)
 
