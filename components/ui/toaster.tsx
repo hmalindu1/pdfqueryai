@@ -10,6 +10,11 @@ import {
 } from "@/components/ui/toast"
 import { useToast } from "@/components/ui/use-toast"
 
+/**
+ * Renders a toast notification component.
+ *
+ * @return {JSX.Element} The rendered toast notification component.
+ */
 export function Toaster() {
   const { toasts } = useToast()
 
