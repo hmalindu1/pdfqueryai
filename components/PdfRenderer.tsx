@@ -31,6 +31,26 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
     const [numPages, setNumPages] = useState<number>()
     const [currPage, setCurrPage] = useState<number>(1)
 
+    const customPageValidator = z.object({
+        page: z
+            .string()
+            .refine((num) => Number(num) > 0 && Number(num) <= numPages!)
+    })
+
+    type TCustomPageValidator = z.infer<typeof customPageValidator>
+
+    const {
+        register,
+        formState: { errors },
+        handleSubmit,
+        setValue
+    } = useForm<TCustomPageValidator>({
+        defaultValues: {
+            page: '1'
+        },
+        resolver: zodResolver(customPageValidator)
+    })
+
     const { width, ref } = useResizeDetector()
 
     return (
