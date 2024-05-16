@@ -53,6 +53,12 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
 
     const { width, ref } = useResizeDetector()
 
+    /**
+     * Updates the current page number and sets the value for the page.
+     *
+     * @param {TCustomPageValidator} page - The page object containing the page number
+     * @return {void} No return value
+     */
     const handlePageSubmit = ({ page }: TCustomPageValidator) => {
         setCurrPage(Number(page))
         setValue('page', String(page))
