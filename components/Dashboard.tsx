@@ -9,7 +9,6 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { Button } from './ui/button'
 
-
 /**
  * Renders the Dashboard component.
  *
@@ -23,6 +22,11 @@ const Dashboard = () => {
     const { data: files, isLoading } = trpc.getUserFiles.useQuery()
 
     const { mutate: deleteFile } = trpc.deleteFile.useMutation({
+        /**
+         * Invalidates the user files in the utils object on success.
+         *
+         * @return {void} No return value
+         */
         onSuccess: () => {
             utils.getUserFiles.invalidate()
         },
