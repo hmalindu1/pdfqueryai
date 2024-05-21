@@ -165,6 +165,11 @@ const UploadDropzone = () => {
     )
 }
 
+/**
+ * Renders an upload button component that opens a dialog when clicked.
+ *
+ * @return {JSX.Element} The rendered upload button component.
+ */
 const UploadButton = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false)
     return (
