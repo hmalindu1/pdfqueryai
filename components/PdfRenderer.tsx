@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
@@ -61,8 +61,11 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
      */
     const handlePageSubmit = ({ page }: TCustomPageValidator) => {
         setCurrPage(Number(page))
-        setValue('page', String(page))
     }
+
+    useEffect(() => {
+        setValue('page', String(currPage))
+    }, [currPage, setValue])
 
     return (
         <div className="w-full bg-white rounded-md shadow flex flex-col items-center">
