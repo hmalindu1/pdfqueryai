@@ -11,6 +11,13 @@ interface PdfFullScreenProps {
     fileUrl: string
 }
 
+/**
+ * Renders a full-screen PDF viewer component.
+ *
+ * @param {PdfFullScreenProps} props - The component props.
+ * @param {string} props.fileUrl - The URL of the PDF file to render.
+ * @return {JSX.Element} The rendered full-screen PDF viewer component.
+ */
 const PdfFullScreen = ({ fileUrl }: PdfFullScreenProps) => {
     const [isOpen, setIsOpen] = useState(false)
     const [numPages, setNumPages] = useState<number>()
