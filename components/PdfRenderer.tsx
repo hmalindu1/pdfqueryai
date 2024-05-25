@@ -33,7 +33,7 @@ interface PdfRendererProps {
  * @param {string} url - The URL of the PDF file to render
  * @return {JSX.Element} The rendered PDF document component
  */
-const PdfRenderer = ({ url }: PdfRendererProps) => {
+const PdfRenderer = ({ url }: PdfRendererProps): JSX.Element => {
     const { toast } = useToast()
 
     const [numPages, setNumPages] = useState<number>()
