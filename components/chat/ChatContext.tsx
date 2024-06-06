@@ -5,7 +5,7 @@ import { useMutation } from '@tanstack/react-query'
 type StreamResponse = {
     addMessage: () => void
     message: string
-    handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+    handleInputChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void
     isLoading: boolean
 }
 
@@ -32,7 +32,7 @@ export const ChatContextProvider = ({
 
     const { mutate: sendMessage } = useMutation({
         mutationFn: async ({message} : {message: string}) => {
-            const response = await fetch('api/message', {
+            const response = await fetch('/api/message', {
                 method: 'POST',
                 body: JSON.stringify({
                     fileId,
@@ -48,7 +48,7 @@ export const ChatContextProvider = ({
         }
     })
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setMessage(e.target.value)
     }
 
