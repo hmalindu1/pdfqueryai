@@ -16,7 +16,7 @@ const Navbar = () => {
             <MaxWIdthWrapper>
                 <div className="flex h-14 items-center justify-between border-b boreder-zinc-200">
                     <Link href="/" className="flex z-40 font-semibold">
-                        <span>Quizz</span>
+                        <span>PDF Query Ai</span>
                     </Link>
 
                     {/* todoo: add mobile navbar */}
