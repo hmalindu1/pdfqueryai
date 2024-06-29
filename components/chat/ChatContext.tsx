@@ -1,4 +1,4 @@
-import { createContext, useRef, useState } from 'react'
+import { ReactNode, createContext, useRef, useState } from 'react'
 import { useToast } from '../ui/use-toast'
 import { useMutation } from '@tanstack/react-query'
 import { trpc } from '@/app/_trpc/client'
@@ -18,19 +18,16 @@ export const ChatContext = createContext<StreamResponse>({
     isLoading: false
 })
 
-interface ChatContextProviderProps {
+interface Props {
     fileId: string
-    children: React.ReactNode
+    children: ReactNode
 }
 
-export const ChatContextProvider = ({
-    fileId,
-    children
-}: ChatContextProviderProps) => {
+export const ChatContextProvider = ({ fileId, children }: Props) => {
     const [message, setMessage] = useState<string>('')
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
-    const utils = trpc.useContext()
+    const utils = trpc.useUtils()
 
     const { toast } = useToast()
 
@@ -104,7 +101,97 @@ export const ChatContextProvider = ({
                     []
             }
         },
+        onSuccess: async (stream) => {
+            setIsLoading(false)
 
+            if (!stream) {
+                return toast({
+                    title: 'There was a problem sending this message',
+                    description: 'Please refresh this page and try again',
+                    variant: 'destructive'
+                })
+            }
+
+            const reader = stream.getReader()
+            const decoder = new TextDecoder()
+            let done = false
+
+            // accumulated response
+            let accResponse = ''
+
+            while (!done) {
+                const { value, done: doneReading } = await reader.read()
+                done = doneReading
+                if (value) {
+                    const chunkValue = decoder.decode(value, { stream: true })
+                    accResponse += chunkValue
+
+                    // Remove unwanted characters from chunkValue (if necessary)
+                    const cleanedChunk = chunkValue
+                        .replace(/0:/g, '')
+                        .replace(/\n/g, '')
+                        .replace(/"/g, '')
+
+                    // Update the UI with the chunk response
+                    utils.getFileMessages.setInfiniteData(
+                        { fileId, limit: INFINITE_QUERY_LIMIT },
+                        (old) => {
+                            if (!old) return { pages: [], pageParams: [] }
+
+                            let isAiResponseCreated = old.pages.some((page) =>
+                                page.messages.some(
+                                    (message) => message.id === 'ai-response'
+                                )
+                            )
+
+                            let updatedPages = old.pages.map((page) => {
+                                if (page === old.pages[0]) {
+                                    let updatedMessages
+
+                                    if (!isAiResponseCreated) {
+                                        updatedMessages = [
+                                            {
+                                                createdAt:
+                                                    new Date().toISOString(),
+                                                id: 'ai-response',
+                                                text: cleanedChunk,
+                                                isUserMessage: false
+                                            },
+                                            ...page.messages
+                                        ]
+                                    } else {
+                                        updatedMessages = page.messages.map(
+                                            (message) => {
+                                                if (
+                                                    message.id === 'ai-response'
+                                                ) {
+                                                    return {
+                                                        ...message,
+                                                        text:
+                                                            message.text +
+                                                            cleanedChunk
+                                                    }
+                                                }
+                                                return message
+                                            }
+                                        )
+                                    }
+
+                                    return {
+                                        ...page,
+                                        messages: updatedMessages
+                                    }
+                                }
+
+                                return page
+                            })
+
+                            return { ...old, pages: updatedPages }
+                        }
+                    )
+                }
+            }
+        },
         onError: (_, __, context) => {
             setMessage(backupMessage.current)
             utils.getFileMessages.setData(
@@ -123,9 +210,7 @@ export const ChatContextProvider = ({
         setMessage(e.target.value)
     }
 
-    const addMessage = () => {
-        sendMessage({ message })
-    }
+    const addMessage = () => sendMessage({ message })
 
     return (
         <ChatContext.Provider
