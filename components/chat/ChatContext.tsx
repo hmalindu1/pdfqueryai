@@ -3,6 +3,7 @@ import { useToast } from '../ui/use-toast'
 import { useMutation } from '@tanstack/react-query'
 import { trpc } from '@/app/_trpc/client'
 import { INFINITE_QUERY_LIMIT } from '@/config/infinite-query'
+import { useIntersection } from "@mantine/hooks";
 
 type StreamResponse = {
     addMessage: () => void
