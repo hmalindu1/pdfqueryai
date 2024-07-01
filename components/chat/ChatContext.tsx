@@ -24,6 +24,13 @@ interface Props {
     children: ReactNode
 }
 
+/**
+ * Chat context provider function that handles sending messages, updating message history, and managing loading states.
+ *
+ * @param {Props} fileId - The ID of the file
+ * @param {Props} children - The children elements to be rendered
+ * @return {void}
+ */
 export const ChatContextProvider = ({ fileId, children }: Props) => {
     const [message, setMessage] = useState<string>('')
     const [isLoading, setIsLoading] = useState<boolean>(false)
