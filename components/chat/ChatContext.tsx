@@ -42,6 +42,14 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
     const backupMessage = useRef('')
 
     const { mutate: sendMessage } = useMutation({
+        /**
+         * Sends a message to the server using the '/api/message' endpoint.
+         *
+         * @param {Object} options - The options object.
+         * @param {string} options.message - The message to be sent.
+         * @return {Promise<ReadableStream>} The response body from the server.
+         * @throws {Error} If the server response is not ok.
+         */
         mutationFn: async ({ message }: { message: string }) => {
             const response = await fetch('/api/message', {
                 method: 'POST',
@@ -84,7 +92,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
 
                     latestPage.messages = [
                         {
-                            createdAt: new Date().toISOString(),
+                           createdAt: new Date().toISOString(),
                             id: crypto.randomUUID(),
                             text: message,
                             isUserMessage: true
