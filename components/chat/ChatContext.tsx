@@ -65,6 +65,15 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
 
             return response.body
         },
+    /**
+     * Saves the current message as a backup, clears the message input, cancels any ongoing file messages requests,
+     * retrieves the previous messages, updates the file messages with the new message, and sets the loading state to true.
+     *
+     * @param {Object} options - The options object.
+     * @param {string} options.message - The message to be sent.
+     * @return {Promise<Object>} An object containing the previous messages.
+     * @throws {Error} If the server response is not ok.
+     */
         onMutate: async ({ message }) => {
             backupMessage.current = message
             setMessage('')
