@@ -126,6 +126,12 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
                     []
             }
         },
+        /**
+         * Handles the success callback for the stream.
+         *
+         * @param {ReadableStream} stream - The stream object.
+         * @return {Promise<void>} - A promise that resolves when the function completes.
+         */
         onSuccess: async (stream) => {
             setIsLoading(false)
 
