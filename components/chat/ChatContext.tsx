@@ -223,6 +223,14 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
                 }
             }
         },
+        /**
+         * Handles the error by restoring the backup message and updating the file messages.
+         *
+         * @param {unknown} _ - The first unused parameter.
+         * @param {unknown} __ - The second unused parameter.
+         * @param {object} context - The context object containing the previous messages.
+         * @return {void} This function does not return anything.
+         */
         onError: (_, __, context) => {
             setMessage(backupMessage.current)
             utils.getFileMessages.setData(
