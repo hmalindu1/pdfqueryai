@@ -8,6 +8,13 @@ interface ChatInputProps {
     isDisabled?: boolean
 }
 
+/**
+ * Renders the chat input component.
+ *
+ * @param {ChatInputProps} props - The props for the ChatInput component.
+ * @param {boolean} props.isDisabled - Indicates whether the input is disabled.
+ * @return {JSX.Element} The rendered ChatInput component.
+ */
 const ChatInput = ({ isDisabled }: ChatInputProps) => {
     const { addMessage, handleInputChange, isLoading, message } =
         useContext(ChatContext)
