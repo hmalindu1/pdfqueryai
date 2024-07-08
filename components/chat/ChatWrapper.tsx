@@ -13,6 +13,12 @@ interface ChatWrapperProps {
     fileId: string
 }
 
+/**
+ * Renders the chat wrapper component based on the status of the file upload.
+ *
+ * @param {ChatWrapperProps} props - The props object containing the fileId.
+ * @return {JSX.Element} The chat wrapper component.
+ */
 const ChatWrapper = ({ fileId }: ChatWrapperProps) => {
     const { data, isLoading } = trpc.getFileUploadStatus.useQuery(
         {
