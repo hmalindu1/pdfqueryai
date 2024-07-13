@@ -26,12 +26,16 @@ const UploadDropzone = () => {
 
     const { mutate: startPolling } = trpc.getFile.useMutation({
         /**
-         * A callback function triggered on successful file mutation.
+         * Callback function that is triggered when the file upload is successful.
+         * It navigates the user to the dashboard page of the uploaded file.
          *
-         * @param {any} file - The file object containing information about the uploaded file
-         * @return {void} No return value
+         * @param {Object} file - The file object containing information about the uploaded file.
+         * @param {string} file.id - The unique identifier for the uploaded file.
+         * @return {void} This function does not return anything.
          */
         onSuccess: (file) => {
+            // Navigate the user to the dashboard page of the uploaded file.
+            // The file ID is used as a route parameter in the URL.
             router.push(`/dashboard/${file.id}`)
         },
         retry: true,
