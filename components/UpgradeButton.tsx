@@ -47,6 +47,9 @@ const UpgradeButton = () => {
                 if (respons === false) {
                     openCheckout()
                 }
+                if (typeof respons !== 'boolean' && respons.url) {
+                    window.location.href = respons.url ?? '/dashboard/billing'
+                }
             }
         })
 
