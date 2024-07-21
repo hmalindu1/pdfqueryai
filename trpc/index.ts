@@ -4,6 +4,10 @@ import { TRPCError } from '@trpc/server'
 import { db } from '@/db'
 import { z } from 'zod'
 import { INFINITE_QUERY_LIMIT } from '@/config/infinite-query'
+import { absoluteUrl } from '@/lib/utils'
+import { PLANS } from '@/config/paddle'
+import { getUserSubscriptionPlan, paddle } from '@/lib/paddle'
+import { Paddle } from '@paddle/paddle-node-sdk'
 
 export const appRouter = router({
     authCallback: publicProcedure.query(async () => {
@@ -35,10 +39,48 @@ export const appRouter = router({
                 where: { id: input.fileId, userId: ctx.userId }
             })
 
-            if (!file) return { status: 'PENDING' as const }
+            if (!file) return { uploadStatus: 'PENDING' as const }
 
-            return { status: file.uploadStatus }
+            console.log('=== file', file);
+            
+
+            return {
+                uploadStatus: file.uploadStatus as
+                    | 'SUCCESS'
+                    | 'FAILED'
+                    | 'PROCESSING'
+                    | 'PENDING'
+            }
         }),
+
+    createPaddleSession: privateProcedure.mutation(async ({ ctx }) => {
+        const { userId } = ctx
+
+        const billingUrl = absoluteUrl('/dashboard/billing')
+
+        if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' })
+
+        const dbUser = await db.user.findFirst({
+            where: {
+                id: userId
+            }
+        })
+
+        if (!dbUser) throw new TRPCError({ code: 'UNAUTHORIZED' })
+
+        const subscriptionPlan = await getUserSubscriptionPlan()
+
+        console.log('==== subscriptionPlan', subscriptionPlan)
+
+        if (subscriptionPlan.isSubscribed && dbUser.paddleCustomerId) {
+            // Paddle does not have a direct billing portal session creation like Stripe
+            // You might need to redirect users to a pre-configured billing portal URL or handle this differently
+            return { url: billingUrl }
+        }
+
+        return subscriptionPlan.isSubscribed
+        // return { url: billingUrl }
+    }),
 
     getFileMessages: privateProcedure
         .input(
