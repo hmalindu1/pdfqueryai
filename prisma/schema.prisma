@@ -17,10 +17,10 @@ model User {
   id    String @id @unique
   email String @unique
 
-  stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
-  stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
-  stripePriceId          String?   @map(name: "stripe_price_id")
-  stripeCurrentPeriodEnd DateTime? @map(name: "stripe_current_period_end")
+  paddleCustomerId       String?   @unique @map(name: "paddle_customer_id")
+  paddleSubscriptionId   String?   @unique @map(name: "paddle_subscription_id")
+  paddlePriceId          String?   @map(name: "paddle_price_id")
+  paddleCurrentPeriodEnd DateTime? @map(name: "paddle_current_period_end")
 
   File    File[]
   Message Message[]

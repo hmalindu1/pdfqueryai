@@ -13,6 +13,11 @@ interface ChatWrapperProps {
     fileId: string
 }
 
+// Define the expected structure of the data returned by the query
+interface FileUploadStatus {
+    uploadStatus: 'SUCCESS' | 'FAILED' | 'PROCESSING' | 'PENDING'
+}
+
 /**
  * Renders the chat wrapper component based on the status of the file upload.
  *
@@ -21,20 +26,27 @@ interface ChatWrapperProps {
  */
 const ChatWrapper = ({ fileId }: ChatWrapperProps) => {
     const { data, isLoading } = trpc.getFileUploadStatus.useQuery(
+        { fileId },
         {
-            fileId
-        },
-        {
-            refetchInterval: (data) =>
-                data?.status === 'SUCCESS' || data?.status === 'FAILED'
-                    ? false
-                    : 5000
+            refetchInterval: (queryData) => {
+                if (queryData && 'uploadStatus' in queryData) {
+                    const data = queryData as FileUploadStatus
+                    return data.uploadStatus === 'SUCCESS' ||
+                        data.uploadStatus === 'FAILED'
+                        ? false
+                        : 5000
+                }
+                return false
+            }
         }
     )
 
+    // Type casting data to FileUploadStatus
+    const uploadStatusData = data as FileUploadStatus | undefined
+
     if (isLoading)
         return (
-            <div className="relative min-h-full bg-zinc-50 flex devide-y devide-zinc-200 flex-col justify-between gap-2">
+            <div className="relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2">
                 <div className="flex-1 flex justify-center items-center flex-col mb-28">
                     <div className="flex flex-col items-center gap-2">
                         <Loader2 className="h-8 w-8 text-purple-500 animate-spin" />
@@ -49,9 +61,12 @@ const ChatWrapper = ({ fileId }: ChatWrapperProps) => {
             </div>
         )
 
-    if (data?.status === 'PROCESSING')
+    if (
+        uploadStatusData?.uploadStatus === 'PROCESSING' ||
+        uploadStatusData?.uploadStatus === 'PENDING'
+    )
         return (
-            <div className="relative min-h-full bg-zinc-50 flex devide-y devide-zinc-200 flex-col justify-between gap-2">
+            <div className="relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2">
                 <div className="flex-1 flex justify-center items-center flex-col mb-28">
                     <div className="flex flex-col items-center gap-2">
                         <Loader2 className="h-8 w-8 text-purple-500 animate-spin" />
@@ -68,9 +83,9 @@ const ChatWrapper = ({ fileId }: ChatWrapperProps) => {
             </div>
         )
 
-    if (data?.status === 'FAILED')
+    if (uploadStatusData?.uploadStatus === 'FAILED')
         return (
-            <div className="relative min-h-full bg-zinc-50 flex devide-y devide-zinc-200 flex-col justify-between gap-2">
+            <div className="relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2">
                 <div className="flex-1 flex justify-center items-center flex-col mb-28">
                     <div className="flex flex-col items-center gap-2">
                         <XCircle className="h-8 w-8 text-red-500" />

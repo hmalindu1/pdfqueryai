@@ -6,6 +6,7 @@ import Message from './Message'
 import { useContext, useEffect, useRef } from 'react'
 import { ChatContext } from './ChatContext'
 import { useIntersection } from '@mantine/hooks'
+import { keepPreviousData } from '@tanstack/react-query'
 
 interface MessagesProps {
     fileId: string
@@ -22,7 +23,7 @@ const Messages = ({ fileId }: MessagesProps) => {
             },
             {
                 getNextPageParam: (lastPage) => lastPage?.nextCursor,
-                keepPreviousData: true
+                placeholderData: keepPreviousData
             }
         )
 
