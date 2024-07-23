@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { trpc } from '@/app/_trpc/client'
 import { httpBatchLink } from '@trpc/client'
+import { absoluteUrl } from '@/lib/utils'
 
 /***
  * Component that provides the TRPC and QueryClient context to its children.
@@ -17,7 +18,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
         trpc.createClient({
             links: [
                 httpBatchLink({
-                    url: `${process.env.NEXT_PUBLIC_APP_URL}/api/trpc`,
+                    url: absoluteUrl('/api/trpc')
                 })
             ]
         })
