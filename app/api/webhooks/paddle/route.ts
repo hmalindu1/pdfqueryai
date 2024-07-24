@@ -1,7 +1,5 @@
-import { db } from '@/db'
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
-import * as Serialize from 'php-serialize'
 
 const allowedIpAddresses = [
     // Sandbox
@@ -28,15 +26,6 @@ const getIpAddress = (req: NextRequest): string => {
     return req.ip || ''
 }
 
-function ksort(obj: any) {
-    const keys = Object.keys(obj).sort()
-    const sortedObj: any = {}
-    for (const key of keys) {
-        sortedObj[key] = obj[key]
-    }
-    return sortedObj
-}
-
 async function validateWebhook(req: NextRequest) {
     const ipAddress = getIpAddress(req)
     if (!allowedIpAddresses.includes(ipAddress)) {
@@ -44,54 +33,47 @@ async function validateWebhook(req: NextRequest) {
         return false
     }
 
-    let jsonObj
-    try {
-        jsonObj = await req.json()
-    } catch (error) {
-        console.error('Invalid JSON object', error)
-        return false
-    }
-
+    const rawBody = await req.text()
     const paddleSignature = req.headers.get('Paddle-Signature')
     if (!paddleSignature) {
         console.error('Missing Paddle signature')
         return false
     }
 
-    jsonObj = ksort(jsonObj)
+    const signatureParts = paddleSignature.split(';')
+    const signatureMap = new Map()
+    signatureParts.forEach((part) => {
+        const [key, value] = part.split('=')
+        signatureMap.set(key, value)
+    })
 
-    for (const property in jsonObj) {
-        if (
-            jsonObj.hasOwnProperty(property) &&
-            typeof jsonObj[property] !== 'string'
-        ) {
-            if (Array.isArray(jsonObj[property])) {
-                jsonObj[property] = jsonObj[property].toString()
-            } else {
-                jsonObj[property] = JSON.stringify(jsonObj[property])
-            }
-        }
+    const ts = signatureMap.get('ts')
+    const h1 = signatureMap.get('h1')
+    if (!ts || !h1) {
+        console.error('Invalid Paddle signature format')
+        return false
     }
 
-    const serialized = Serialize.serialize(jsonObj)
-    const verifier = crypto.createVerify('sha1')
-    verifier.update(serialized)
-    verifier.end()
+    // Build the signed payload
+    const signedPayload = `${ts}:${rawBody}`
 
-    const webhookKey = process.env.PADDLE_WEBHOOK_KEY
-        ? process.env.PADDLE_WEBHOOK_KEY.replace(/\\n/g, '\n')
-        : ''
-    if (!webhookKey) {
+    // Compute the HMAC
+    const secretKey = process.env.PADDLE_WEBHOOK_KEY
+    if (!secretKey) {
         throw new Error('Missing Paddle secret key')
     }
 
-    const isValid = verifier.verify(webhookKey, paddleSignature, 'base64')
+    const computedHmac = crypto
+        .createHmac('sha256', secretKey)
+        .update(signedPayload)
+        .digest('hex')
 
-    if (!isValid) {
+    if (computedHmac !== h1) {
         console.error('Invalid Paddle signature')
+        return false
     }
 
-    return isValid
+    return true
 }
 
 const routeHandler = async (req: NextRequest) => {
