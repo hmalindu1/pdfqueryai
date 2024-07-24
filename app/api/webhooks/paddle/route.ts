@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import * as Serialize from 'php-serialize'
 
-const allowedIpAdresses = [
+const allowedIpAddresses = [
     // Sandbox
     '34.194.127.46',
     '54.234.237.108',
@@ -38,26 +38,26 @@ function ksort(obj: any) {
 }
 
 async function validateWebhook(req: NextRequest) {
-    if (!allowedIpAdresses.includes(getIpAddress(req))) {
+    const ipAddress = getIpAddress(req)
+    if (!allowedIpAddresses.includes(ipAddress)) {
         console.error('No valid Paddle IP address')
         return false
     }
 
-    let jsonObj = await req.json()
-
-    if (!jsonObj) {
-        console.error('Invalid JSON object')
+    let jsonObj
+    try {
+        jsonObj = await req.json()
+    } catch (error) {
+        console.error('Invalid JSON object', error)
         return false
     }
 
     const paddleSignature = req.headers.get('Paddle-Signature')
-
     if (!paddleSignature) {
         console.error('Missing Paddle signature')
         return false
     }
 
-    const mySig = paddleSignature // Already a string
     jsonObj = ksort(jsonObj)
 
     for (const property in jsonObj) {
@@ -78,11 +78,14 @@ async function validateWebhook(req: NextRequest) {
     verifier.update(serialized)
     verifier.end()
 
-    if (!process.env.PADDLE_WEBHOOK_KEY) {
+    const webhookKey = process.env.PADDLE_WEBHOOK_KEY
+        ? process.env.PADDLE_WEBHOOK_KEY.replace(/\\n/g, '\n')
+        : ''
+    if (!webhookKey) {
         throw new Error('Missing Paddle secret key')
     }
-    const webhookKey = process.env.PADDLE_WEBHOOK_KEY.replace(/\\n/g, '\n') || ''
-    const isValid = verifier.verify(webhookKey, mySig, 'base64')
+
+    const isValid = verifier.verify(webhookKey, paddleSignature, 'base64')
 
     if (!isValid) {
         console.error('Invalid Paddle signature')
@@ -96,34 +99,32 @@ const routeHandler = async (req: NextRequest) => {
         return new NextResponse('Method Not Allowed', { status: 405 })
     }
 
-    if (!(await validateWebhook(req))) {
+    const isValid = await validateWebhook(req)
+    if (!isValid) {
         return new NextResponse('Invalid Webhook Signature', { status: 400 })
     }
 
     const event = await req.json()
-
     console.log('=== event', event)
 
-    // const subscriptionId = event.subscription_id
-    // const userId = event.user_id // assuming you have a user_id in the metadata
+    // Handle the event here as needed
+    // const subscriptionId = event.subscription_id;
+    // const userId = event.user_id; // assuming you have a user_id in the metadata
 
     // if (!userId) {
-    //     return new NextResponse('No user_id in metadata', { status: 200 })
+    //     return new NextResponse('No user_id in metadata', { status: 200 });
     // }
 
-    // if (
-    //     event.alert_name === 'subscription_created' ||
-    //     event.alert_name === 'subscription_updated'
-    // ) {
+    // if (event.alert_name === 'subscription_created' || event.alert_name === 'subscription_updated') {
     //     await db.user.update({
     //         where: { id: userId },
     //         data: {
     //             paddleSubscriptionId: subscriptionId,
     //             paddleCustomerId: event.customer_id,
     //             paddlePlanId: event.subscription_plan_id,
-    //             paddleCurrentPeriodEnd: new Date(event.next_bill_date)
-    //         }
-    //     })
+    //             paddleCurrentPeriodEnd: new Date(event.next_bill_date),
+    //         },
+    //     });
     // }
 
     // if (event.alert_name === 'subscription_payment_succeeded') {
@@ -131,9 +132,9 @@ const routeHandler = async (req: NextRequest) => {
     //         where: { paddleSubscriptionId: subscriptionId },
     //         data: {
     //             paddlePlanId: event.subscription_plan_id,
-    //             paddleCurrentPeriodEnd: new Date(event.next_bill_date)
-    //         }
-    //     })
+    //             paddleCurrentPeriodEnd: new Date(event.next_bill_date),
+    //         },
+    //     });
     // }
 
     return new NextResponse('Webhook received', { status: 200 })
