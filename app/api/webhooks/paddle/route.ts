@@ -50,8 +50,14 @@ async function validateWebhook(req: NextRequest) {
         return false
     }
 
-    const mySig = Buffer.from(jsonObj.p_signature, 'base64')
-    delete jsonObj.p_signature
+    const paddleSignature = req.headers.get('Paddle-Signature')
+
+    if (!paddleSignature) {
+        console.error('Missing Paddle signature')
+        return false
+    }
+
+    const mySig = paddleSignature // Already a string
     jsonObj = ksort(jsonObj)
 
     for (const property in jsonObj) {
@@ -73,7 +79,7 @@ async function validateWebhook(req: NextRequest) {
     verifier.end()
 
     const publicKey = process.env.PADDLE_PUBLIC_KEY?.replace(/\\n/g, '\n') || ''
-    const isValid = verifier.verify(publicKey, mySig)
+    const isValid = verifier.verify(publicKey, mySig, 'base64')
 
     if (!isValid) {
         console.error('Invalid Paddle signature')
