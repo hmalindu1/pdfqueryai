@@ -78,8 +78,11 @@ async function validateWebhook(req: NextRequest) {
     verifier.update(serialized)
     verifier.end()
 
-    const publicKey = process.env.PADDLE_PUBLIC_KEY?.replace(/\\n/g, '\n') || ''
-    const isValid = verifier.verify(publicKey, mySig, 'base64')
+    if (!process.env.PADDLE_WEBHOOK_KEY) {
+        throw new Error('Missing Paddle secret key')
+    }
+    const webhookKey = process.env.PADDLE_WEBHOOK_KEY.replace(/\\n/g, '\n') || ''
+    const isValid = verifier.verify(webhookKey, mySig, 'base64')
 
     if (!isValid) {
         console.error('Invalid Paddle signature')
