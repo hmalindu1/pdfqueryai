@@ -26,14 +26,13 @@ const getIpAddress = (req: NextRequest): string => {
     return req.ip || ''
 }
 
-async function validateWebhook(req: NextRequest) {
+async function validateWebhook(req: NextRequest, rawBody: string) {
     const ipAddress = getIpAddress(req)
     if (!allowedIpAddresses.includes(ipAddress)) {
         console.error('No valid Paddle IP address')
         return false
     }
 
-    const rawBody = await req.text()
     const paddleSignature = req.headers.get('Paddle-Signature')
     if (!paddleSignature) {
         console.error('Missing Paddle signature')
@@ -81,12 +80,13 @@ const routeHandler = async (req: NextRequest) => {
         return new NextResponse('Method Not Allowed', { status: 405 })
     }
 
-    const isValid = await validateWebhook(req)
+    const rawBody = await req.text() // Read the raw body only once
+    const isValid = await validateWebhook(req, rawBody)
     if (!isValid) {
         return new NextResponse('Invalid Webhook Signature', { status: 400 })
     }
 
-    const event = await req.json()
+    const event = JSON.parse(rawBody) // Parse the raw body as JSON
     console.log('=== event', event)
 
     // Handle the event here as needed
