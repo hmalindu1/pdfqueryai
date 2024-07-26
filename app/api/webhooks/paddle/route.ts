@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
+import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
+import { db } from '@/db'
 
 const allowedIpAddresses = [
     // Sandbox
@@ -76,6 +78,14 @@ async function validateWebhook(req: NextRequest, rawBody: string) {
 }
 
 const routeHandler = async (req: NextRequest) => {
+    const { getUser } = getKindeServerSession()
+    const user = await getUser()
+    if (!user?.id) {
+        return new NextResponse('Unauthorized', { status: 401 })
+    }
+
+    const userId = user.id
+
     if (req.method !== 'POST') {
         return new NextResponse('Method Not Allowed', { status: 405 })
     }
@@ -89,6 +99,23 @@ const routeHandler = async (req: NextRequest) => {
     const event = JSON.parse(rawBody) // Parse the raw body as JSON
     console.log('=== event', event)
 
+    if (event.event_type === 'subscription.activated') {
+        console.log(
+            '=== subscription.activated price Id',
+            event.data.items[0].price.id
+        )
+        await db.user.update({
+            where: { id: userId },
+            data: {
+                paddleSubscriptionId: event.data.id,
+                paddleCustomerId: event.data.customer_id,
+                paddlePriceId: event.data.items[0].price.id,
+                paddleCurrentPeriodEnd: new Date(
+                    event.data.current_billing_period.ends_at
+                )
+            }
+        })
+    }
     // Handle the event here as needed
     // const subscriptionId = event.subscription_id;
     // const userId = event.user_id; // assuming you have a user_id in the metadata
@@ -103,7 +130,7 @@ const routeHandler = async (req: NextRequest) => {
     //         data: {
     //             paddleSubscriptionId: subscriptionId,
     //             paddleCustomerId: event.customer_id,
-    //             paddlePlanId: event.subscription_plan_id,
+    //             paddlePriceId: event.subscription_plan_id,
     //             paddleCurrentPeriodEnd: new Date(event.next_bill_date),
     //         },
     //     });
@@ -113,7 +140,7 @@ const routeHandler = async (req: NextRequest) => {
     //     await db.user.update({
     //         where: { paddleSubscriptionId: subscriptionId },
     //         data: {
-    //             paddlePlanId: event.subscription_plan_id,
+    //             paddlePriceId: event.subscription_plan_id,
     //             paddleCurrentPeriodEnd: new Date(event.next_bill_date),
     //         },
     //     });
