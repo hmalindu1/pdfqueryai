@@ -93,6 +93,7 @@ const routeHandler = async (req: NextRequest) => {
         console.log('Authenticated User:', user)
 
         if (!user?.id) {
+            console.error('User ID is null or undefined')
             return new NextResponse('Unauthorized', { status: 401 })
         }
 
