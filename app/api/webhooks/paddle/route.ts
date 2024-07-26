@@ -4,14 +4,12 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import { db } from '@/db'
 
 const allowedIpAddresses = [
-    // Sandbox
     '34.194.127.46',
     '54.234.237.108',
     '3.208.120.145',
     '44.226.236.210',
     '44.241.183.62',
     '100.20.172.113',
-    // Production
     '34.232.58.13',
     '34.195.105.136',
     '34.237.3.244',
@@ -28,8 +26,12 @@ const getIpAddress = (req: NextRequest): string => {
     return req.ip || ''
 }
 
-async function validateWebhook(req: NextRequest, rawBody: string) {
+async function validateWebhook(
+    req: NextRequest,
+    rawBody: string
+): Promise<boolean> {
     const ipAddress = getIpAddress(req)
+    console.log('Received IP Address:', ipAddress)
     if (!allowedIpAddresses.includes(ipAddress)) {
         console.error('No valid Paddle IP address')
         return false
@@ -42,10 +44,12 @@ async function validateWebhook(req: NextRequest, rawBody: string) {
     }
 
     const signatureParts = paddleSignature.split(';')
-    const signatureMap = new Map()
+    const signatureMap = new Map<string, string>()
     signatureParts.forEach((part) => {
         const [key, value] = part.split('=')
-        signatureMap.set(key, value)
+        if (key && value) {
+            signatureMap.set(key, value)
+        }
     })
 
     const ts = signatureMap.get('ts')
@@ -57,6 +61,7 @@ async function validateWebhook(req: NextRequest, rawBody: string) {
 
     // Build the signed payload
     const signedPayload = `${ts}:${rawBody}`
+    console.log('Signed Payload:', signedPayload)
 
     // Compute the HMAC
     const secretKey = process.env.PADDLE_WEBHOOK_KEY
@@ -69,6 +74,8 @@ async function validateWebhook(req: NextRequest, rawBody: string) {
         .update(signedPayload)
         .digest('hex')
 
+    console.log('Computed HMAC:', computedHmac, 'Received HMAC:', h1)
+
     if (computedHmac !== h1) {
         console.error('Invalid Paddle signature')
         return false
@@ -78,75 +85,53 @@ async function validateWebhook(req: NextRequest, rawBody: string) {
 }
 
 const routeHandler = async (req: NextRequest) => {
-    const { getUser } = getKindeServerSession()
-    const user = await getUser()
-    if (!user?.id) {
-        return new NextResponse('Unauthorized', { status: 401 })
+    try {
+        const { getUser } = getKindeServerSession()
+        const user = await getUser()
+        console.log('Authenticated User:', user)
+
+        if (!user?.id) {
+            return new NextResponse('Unauthorized', { status: 401 })
+        }
+
+        if (req.method !== 'POST') {
+            return new NextResponse('Method Not Allowed', { status: 405 })
+        }
+
+        const rawBody = await req.text() // Read the raw body only once
+        const isValid = await validateWebhook(req, rawBody)
+        if (!isValid) {
+            return new NextResponse('Invalid Webhook Signature', {
+                status: 400
+            })
+        }
+
+        const event = JSON.parse(rawBody) // Parse the raw body as JSON
+        console.log('=== event', event)
+
+        if (event.event_type === 'subscription.activated') {
+            console.log(
+                '=== subscription.activated price Id',
+                event.data.items[0].price.id
+            )
+            await db.user.update({
+                where: { id: user.id },
+                data: {
+                    paddleSubscriptionId: event.data.id,
+                    paddleCustomerId: event.data.customer_id,
+                    paddlePriceId: event.data.items[0].price.id,
+                    paddleCurrentPeriodEnd: new Date(
+                        event.data.current_billing_period.ends_at
+                    )
+                }
+            })
+        }
+
+        return new NextResponse('Webhook received', { status: 200 })
+    } catch (error) {
+        console.error('Error handling webhook:', error)
+        return new NextResponse('Internal Server Error', { status: 500 })
     }
-
-    const userId = user.id
-
-    if (req.method !== 'POST') {
-        return new NextResponse('Method Not Allowed', { status: 405 })
-    }
-
-    const rawBody = await req.text() // Read the raw body only once
-    const isValid = await validateWebhook(req, rawBody)
-    if (!isValid) {
-        return new NextResponse('Invalid Webhook Signature', { status: 400 })
-    }
-
-    const event = JSON.parse(rawBody) // Parse the raw body as JSON
-    console.log('=== event', event)
-
-    if (event.event_type === 'subscription.activated') {
-        console.log(
-            '=== subscription.activated price Id',
-            event.data.items[0].price.id
-        )
-        await db.user.update({
-            where: { id: userId },
-            data: {
-                paddleSubscriptionId: event.data.id,
-                paddleCustomerId: event.data.customer_id,
-                paddlePriceId: event.data.items[0].price.id,
-                paddleCurrentPeriodEnd: new Date(
-                    event.data.current_billing_period.ends_at
-                )
-            }
-        })
-    }
-    // Handle the event here as needed
-    // const subscriptionId = event.subscription_id;
-    // const userId = event.user_id; // assuming you have a user_id in the metadata
-
-    // if (!userId) {
-    //     return new NextResponse('No user_id in metadata', { status: 200 });
-    // }
-
-    // if (event.alert_name === 'subscription_created' || event.alert_name === 'subscription_updated') {
-    //     await db.user.update({
-    //         where: { id: userId },
-    //         data: {
-    //             paddleSubscriptionId: subscriptionId,
-    //             paddleCustomerId: event.customer_id,
-    //             paddlePriceId: event.subscription_plan_id,
-    //             paddleCurrentPeriodEnd: new Date(event.next_bill_date),
-    //         },
-    //     });
-    // }
-
-    // if (event.alert_name === 'subscription_payment_succeeded') {
-    //     await db.user.update({
-    //         where: { paddleSubscriptionId: subscriptionId },
-    //         data: {
-    //             paddlePriceId: event.subscription_plan_id,
-    //             paddleCurrentPeriodEnd: new Date(event.next_bill_date),
-    //         },
-    //     });
-    // }
-
-    return new NextResponse('Webhook received', { status: 200 })
 }
 
 export { routeHandler as POST }
