@@ -86,8 +86,10 @@ async function validateWebhook(
 
 const routeHandler = async (req: NextRequest) => {
     try {
-        const { getUser } = getKindeServerSession()
-        const user = await getUser()
+        const session = await getKindeServerSession()
+        console.log('Session:', session)
+
+        const user = session ? await session.getUser() : null
         console.log('Authenticated User:', user)
 
         if (!user?.id) {
