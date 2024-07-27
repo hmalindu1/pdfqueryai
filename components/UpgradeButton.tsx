@@ -6,7 +6,11 @@ import { trpc } from '@/app/_trpc/client'
 import { initializePaddle, Paddle } from '@paddle/paddle-js'
 import { useEffect, useState } from 'react'
 
-const UpgradeButton = (userId: string) => {
+interface UpgradeButtonProps {
+    userId: string
+}
+
+const UpgradeButton = ({ userId }: UpgradeButtonProps) => {
     const [paddle, setPaddle] = useState<Paddle>()
 
     useEffect(() => {
