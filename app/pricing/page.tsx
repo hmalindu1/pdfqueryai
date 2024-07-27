@@ -14,14 +14,8 @@ import { ArrowRight, Check, HelpCircle, Minus } from 'lucide-react'
 import Link from 'next/link'
 
 const Page = async () => {
-    const { getUser } = getKindeServerSession()
-    const user = await getUser()
-
-    if (!user || !user.id) {
-        throw new Error('User not found')
-    }
-
-    const userId = user.id
+    const session = await getKindeServerSession()
+    const user = session ? await session.getUser() : null
 
     const pricingItems = [
         {
@@ -236,7 +230,9 @@ const Page = async () => {
                                                     <ArrowRight className="h-5 w-5 ml-1.5" />
                                                 </Link>
                                             ) : user ? (
-                                                <UpgradeButton userId = {userId} />
+                                                <UpgradeButton
+                                                    userId={user.id}
+                                                />
                                             ) : (
                                                 <Link
                                                     href="/api/auth/login"
