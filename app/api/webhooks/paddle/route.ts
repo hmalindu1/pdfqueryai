@@ -86,17 +86,6 @@ async function validateWebhook(
 
 const routeHandler = async (req: NextRequest) => {
     try {
-        // const session = await getKindeServerSession()
-        // console.log('Session:', session)
-
-        // const user = session ? await session.getUser() : null
-        // console.log('Authenticated User:', user)
-
-        // if (!user?.id) {
-        //     console.error('User ID is null or undefined')
-        //     return new NextResponse('Unauthorized', { status: 401 })
-        // }
-
         if (req.method !== 'POST') {
             return new NextResponse('Method Not Allowed', { status: 405 })
         }
@@ -112,23 +101,19 @@ const routeHandler = async (req: NextRequest) => {
         const event = JSON.parse(rawBody) // Parse the raw body as JSON
         console.log('=== event', event)
 
-        // if (event.event_type === 'subscription.activated') {
-        //     console.log(
-        //         '=== subscription.activated price Id',
-        //         event.data.items[0].price.id
-        //     )
-        //     await db.user.update({
-        //         where: { id: user.id },
-        //         data: {
-        //             paddleSubscriptionId: event.data.id,
-        //             paddleCustomerId: event.data.customer_id,
-        //             paddlePriceId: event.data.items[0].price.id,
-        //             paddleCurrentPeriodEnd: new Date(
-        //                 event.data.current_billing_period.ends_at
-        //             )
-        //         }
-        //     })
-        // }
+        if (event.event_type === 'subscription.activated') {
+            await db.user.update({
+                where: { id: event.data.custom_data.user_id },
+                data: {
+                    paddleSubscriptionId: event.data.id,
+                    paddleCustomerId: event.data.customer_id,
+                    paddlePriceId: event.data.items[0].price.id,
+                    paddleCurrentPeriodEnd: new Date(
+                        event.data.current_billing_period.ends_at
+                    )
+                }
+            })
+        }
 
         return new NextResponse('Webhook received', { status: 200 })
     } catch (error) {
