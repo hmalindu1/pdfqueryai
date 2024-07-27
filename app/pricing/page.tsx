@@ -17,6 +17,12 @@ const Page = async () => {
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
+    if (!user || !user.id) {
+        throw new Error('User not found')
+    }
+
+    const userId = user.id
+
     const pricingItems = [
         {
             plan: 'Free',
@@ -230,7 +236,7 @@ const Page = async () => {
                                                     <ArrowRight className="h-5 w-5 ml-1.5" />
                                                 </Link>
                                             ) : user ? (
-                                                <UpgradeButton />
+                                                <UpgradeButton userId = {userId} />
                                             ) : (
                                                 <Link
                                                     href="/api/auth/login"

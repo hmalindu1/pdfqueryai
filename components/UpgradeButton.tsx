@@ -6,12 +6,10 @@ import { trpc } from '@/app/_trpc/client'
 import { initializePaddle, Paddle } from '@paddle/paddle-js'
 import { useEffect, useState } from 'react'
 
-const UpgradeButton = () => {
+const UpgradeButton = (userId: string) => {
     const [paddle, setPaddle] = useState<Paddle>()
 
     useEffect(() => {
-        console.log('running useEffect');
-        
         initializePaddle({
             environment: 'sandbox',
             token: `${process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN}`
@@ -22,9 +20,6 @@ const UpgradeButton = () => {
         })
     }, [])
 
-    console.log('=== paddle', paddle);
-    
-
     const openCheckout = () => {
         paddle?.Checkout.open({
             items: [
@@ -32,16 +27,15 @@ const UpgradeButton = () => {
                     priceId: `${process.env.NEXT_PUBLIC_PADDLE_PRICE_ID}`,
                     quantity: 1
                 }
-            ]
+            ],
+            customData: {
+                user_id: userId
+            }
         })
     }
 
-
     const { mutate: createPaddleSession } =
         trpc.createPaddleSession.useMutation({
-            // onSuccess: ({ url }) => {
-            //     window.location.href = url ?? '/dashboard/billing'
-            // }
             onSuccess: (respons) => {
                 console.log('=== respons from UpgradeButton', respons)
                 if (respons === false) {
