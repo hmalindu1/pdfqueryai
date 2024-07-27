@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
-import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import { db } from '@/db'
 
 const allowedIpAddresses = [
@@ -31,7 +30,6 @@ async function validateWebhook(
     rawBody: string
 ): Promise<boolean> {
     const ipAddress = getIpAddress(req)
-    console.log('Received IP Address:', ipAddress)
     if (!allowedIpAddresses.includes(ipAddress)) {
         console.error('No valid Paddle IP address')
         return false
@@ -61,7 +59,6 @@ async function validateWebhook(
 
     // Build the signed payload
     const signedPayload = `${ts}:${rawBody}`
-    console.log('Signed Payload:', signedPayload)
 
     // Compute the HMAC
     const secretKey = process.env.PADDLE_WEBHOOK_KEY
@@ -74,7 +71,6 @@ async function validateWebhook(
         .update(signedPayload)
         .digest('hex')
 
-    console.log('Computed HMAC:', computedHmac, 'Received HMAC:', h1)
 
     if (computedHmac !== h1) {
         console.error('Invalid Paddle signature')
