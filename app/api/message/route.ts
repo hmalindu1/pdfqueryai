@@ -106,6 +106,13 @@ export const POST = async (req: NextRequest) => {
     })
 
     const stream = OpenAIStream(response, {
+        /**
+         * Asynchronously creates a new message in the database with the given completion text,
+         * indicating that it is not a user message, and associates it with the given userId and fileId.
+         *
+         * @param {string} completion - The text of the message to be created.
+         * @return {Promise<void>} - A Promise that resolves when the message is successfully created.
+         */
         async onCompletion(completion) {
             await db.message.create({
                 data: {
