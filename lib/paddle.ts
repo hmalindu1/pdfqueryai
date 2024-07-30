@@ -1,11 +1,13 @@
 import { PLANS } from '@/config/paddle'
 import { db } from '@/db'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
-import { Paddle } from '@paddle/paddle-node-sdk'
+import { Environment, Paddle } from '@paddle/paddle-node-sdk'
 
-export const paddle = new Paddle(`${process.env.PADDLE_API_KEY}`)
+export const paddle = new Paddle(`${process.env.PADDLE_API_KEY}`, {environment: Environment.sandbox});
 
 export async function getUserSubscriptionPlan() {
+    console.log('=== running getUserSubscriptionPlan');
+    
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
@@ -39,11 +41,20 @@ export async function getUserSubscriptionPlan() {
             dbUser.paddleCurrentPeriodEnd.getTime() + 86_400_000 > Date.now()
     )
 
+    console.log('=== isSubscribed', isSubscribed);
+    
+
     const plan = isSubscribed
         ? PLANS.find(
               (plan) => plan.price.priceIds.test === dbUser.paddlePriceId
           )
         : null
+
+        console.log('=== plan pro price ids : ',PLANS[1].price.priceIds.test);
+        console.log('=== user db price id : ', dbUser.paddlePriceId)
+        
+        
+    console.log('=== plan', plan);
 
     let isCanceled = false
     if (isSubscribed && dbUser.paddleSubscriptionId) {
