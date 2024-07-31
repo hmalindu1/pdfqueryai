@@ -58,11 +58,22 @@ export async function getUserSubscriptionPlan() {
 
     let isCanceled = false
     if (isSubscribed && dbUser.paddleSubscriptionId) {
-        const paddlePlan = await paddle.subscriptions.get(
-            dbUser.paddleSubscriptionId
-        )
-        isCanceled = !!paddlePlan?.canceledAt
+        try {
+            const paddlePlan = await paddle.subscriptions.get(
+                dbUser.paddleSubscriptionId
+            )
+            // Check if the subscription is canceled
+            if (paddlePlan.canceledAt) {
+                isCanceled = true
+            }
+        } catch (error) {
+            console.error('Error retrieving Paddle subscription:', error)
+        }
     }
+
+    // Now you can use isCanceled as needed
+    console.log('Is subscription canceled:', isCanceled)
+
 
     return {
         ...plan,
