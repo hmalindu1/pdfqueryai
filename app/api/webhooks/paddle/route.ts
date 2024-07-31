@@ -97,12 +97,26 @@ const routeHandler = async (req: NextRequest) => {
         const event = JSON.parse(rawBody) // Parse the raw body as JSON
         console.log('=== event', event)
 
+        // new subscription created
         if (event.event_type === 'subscription.activated') {
             await db.user.update({
                 where: { id: event.data.custom_data.user_id },
                 data: {
                     paddleSubscriptionId: event.data.id,
                     paddleCustomerId: event.data.customer_id,
+                    paddlePriceId: event.data.items[0].price.id,
+                    paddleCurrentPeriodEnd: new Date(
+                        event.data.current_billing_period.ends_at
+                    )
+                }
+            })
+        }
+
+        // user updated the subscription
+        if (event.event_type === 'subscription.updated') {
+            await db.user.update({
+                where: { paddleSubscriptionId: event.data.subscription_id },
+                data: {
                     paddlePriceId: event.data.items[0].price.id,
                     paddleCurrentPeriodEnd: new Date(
                         event.data.current_billing_period.ends_at
