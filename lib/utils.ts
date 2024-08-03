@@ -21,10 +21,10 @@ export function absoluteUrl(path: string) {
 }
 
 export function constructMetadata({
-    title = 'PDFQueryAi - Chat with your PDF files',
-    description = 'PDFQueryAi is a powerful chatbot that can help you with your PDF files. Chat with PDFQueryAi now!',
+    title = 'PDFqueryAi - Chat with your PDF files',
+    description = 'PDFqueryAi is a powerful chatbot that can help you with your PDF files. Chat with PDFqueryAi now!',
     image = '/thumbnail.png',
-    icons = '/favicon.ico',
+    icons = '/favicon.png',
     noIndex = false
 }: {
     title?: string
