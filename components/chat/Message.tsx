@@ -25,7 +25,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         {
                             'order-2 bg-purple-700 rounded-sm':
                                 message.isUserMessage,
-                            'order-1 bg-zinc-800 rounded-sm':
+                            'order-1 bg-zinc-600 rounded-sm':
                                 !message.isUserMessage,
                             invisible: isNextMessageSamePerson
                         }
