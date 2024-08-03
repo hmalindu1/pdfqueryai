@@ -9,6 +9,7 @@ import {
 import { ArrowRight } from 'lucide-react'
 import UserAccountNav from '@/components/UserAccountNav'
 import MobileNav from '@/components/MobileNav'
+import Image from 'next/image'
 
 const Navbar = async () => {
     const { getUser } = getKindeServerSession()
@@ -19,7 +20,12 @@ const Navbar = async () => {
             <MaxWidthWrapper>
                 <div className="flex h-14 items-center justify-between border-b border-zinc-200">
                     <Link href="/" className="flex z-40 font-semibold">
-                        <span>PDFQueryAi</span>
+                        <Image
+                            src="/logo.png"
+                            alt="logo"
+                            width={100}
+                            height={100}
+                        />
                     </Link>
 
                     <MobileNav isAuth={!!user} />
