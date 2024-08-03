@@ -54,7 +54,6 @@ export function constructMetadata({
         },
         icons,
         metadataBase: new URL('https://www.pdfqueryai.com'),
-        themeColor: '#FFF',
         ...(noIndex && {
             robots: {
                 index: false,
