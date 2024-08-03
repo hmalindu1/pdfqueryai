@@ -62,6 +62,8 @@ export async function getUserSubscriptionPlan() {
             const paddlePlan = await paddle.subscriptions.get(
                 dbUser.paddleSubscriptionId
             )
+            console.log('=== paddlePlan', paddlePlan);
+            
             // Check if the subscription is canceled
             if (paddlePlan.canceledAt) {
                 isCanceled = true
