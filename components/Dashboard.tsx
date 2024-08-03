@@ -8,13 +8,18 @@ import Skeleton from 'react-loading-skeleton'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { Button } from './ui/button'
+import { getUserSubscriptionPlan } from '@/lib/paddle'
+
+interface PageProps {
+    subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>
+}
 
 /**
  * Renders the Dashboard component.
  *
  * @return {JSX.Element} The rendered Dashboard component
  */
-const Dashboard = () => {
+const Dashboard = ({ subscriptionPlan }: PageProps) => {
     const [currentDelFile, setCurrentDelFile] = useState<string | null>(null)
 
     const utils = trpc.useUtils()
@@ -44,7 +49,7 @@ const Dashboard = () => {
                 <h1 className="mb-3 font-bold text-5xl text-gray-900">
                     My Files
                 </h1>
-                <UploadButton />
+                <UploadButton isSubscribed={subscriptionPlan.isSubscribed} />
             </div>
 
             {/* Display all user files */}
