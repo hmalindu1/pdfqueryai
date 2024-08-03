@@ -25,6 +25,7 @@ const BillingForm = ({ subscriptionPlan }: BillingFormProps) => {
     const { mutate: createPaddleSession, isPending } =
         trpc.createPaddleSession.useMutation({
             onSuccess: (response) => {
+                console.log('=== response from createPaddleSession', response);
                 if (typeof response !== 'boolean' && response.url) {
                     if (response.url) window.location.href = response.url
                     if (!response.url) {
