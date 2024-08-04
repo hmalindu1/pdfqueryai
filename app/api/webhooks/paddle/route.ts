@@ -117,7 +117,7 @@ const routeHandler = async (req: NextRequest) => {
         if (event.event_type === 'subscription.updated') {
             if (event.data.subscription_id) {
                 await db.user.update({
-                    where: { paddleSubscriptionId: event.data.subscription_id },
+                    where: { paddleSubscriptionId: event.data.id },
                     data: {
                         paddlePriceId: event.data.items[0].price.id,
                         paddleCurrentPeriodEnd: new Date(
