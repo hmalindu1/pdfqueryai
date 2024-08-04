@@ -71,7 +71,6 @@ async function validateWebhook(
         .update(signedPayload)
         .digest('hex')
 
-
     if (computedHmac !== h1) {
         console.error('Invalid Paddle signature')
         return false
@@ -114,15 +113,19 @@ const routeHandler = async (req: NextRequest) => {
 
         // user updated the subscription
         if (event.event_type === 'subscription.updated') {
-            await db.user.update({
-                where: { paddleSubscriptionId: event.data.subscription_id },
-                data: {
-                    paddlePriceId: event.data.items[0].price.id,
-                    paddleCurrentPeriodEnd: new Date(
-                        event.data.current_billing_period.ends_at
-                    )
-                }
-            })
+            if (event.data.subscription_id) {
+                await db.user.update({
+                    where: { paddleSubscriptionId: event.data.subscription_id },
+                    data: {
+                        paddlePriceId: event.data.items[0].price.id,
+                        paddleCurrentPeriodEnd: new Date(
+                            event.data.current_billing_period.ends_at
+                        )
+                    }
+                })
+            } else {
+                console.error('Missing subscription_id in the event data')
+            }
         }
 
         return new NextResponse('Webhook received', { status: 200 })
