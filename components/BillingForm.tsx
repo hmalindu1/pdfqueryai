@@ -44,7 +44,7 @@ const BillingForm = ({ subscriptionPlan }: BillingFormProps) => {
                 className="mt-12"
                 onSubmit={(e) => {
                     e.preventDefault()
-                    createPaddleSession()
+                    createPaddleSession({ action: 'manage' })
                 }}
             >
                 <Card>

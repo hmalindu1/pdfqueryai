@@ -16,7 +16,8 @@ export async function getUserSubscriptionPlan() {
             ...PLANS[0],
             isSubscribed: false,
             isCanceled: false,
-            paddleCurrentPeriodEnd: null
+            paddleCurrentPeriodEnd: null,
+            cancelUrl: null
         }
     }
 
@@ -31,7 +32,8 @@ export async function getUserSubscriptionPlan() {
             ...PLANS[0],
             isSubscribed: false,
             isCanceled: false,
-            paddleCurrentPeriodEnd: null
+            paddleCurrentPeriodEnd: null,
+            cancelUrl: null
         }
     }
 
@@ -57,6 +59,7 @@ export async function getUserSubscriptionPlan() {
     console.log('=== plan', plan);
 
     let isCanceled = false
+    let cancelUrl
     if (isSubscribed && dbUser.paddleSubscriptionId) {
         try {
             const paddlePlan = await paddle.subscriptions.get(
@@ -68,6 +71,11 @@ export async function getUserSubscriptionPlan() {
             if (paddlePlan.canceledAt) {
                 isCanceled = true
             }
+
+            if (paddlePlan.managementUrls && paddlePlan.managementUrls.cancel) {
+                cancelUrl = paddlePlan.managementUrls.cancel
+            }
+            
         } catch (error) {
             console.error('Error retrieving Paddle subscription:', error)
         }
@@ -83,6 +91,7 @@ export async function getUserSubscriptionPlan() {
         paddleCurrentPeriodEnd: dbUser.paddleCurrentPeriodEnd,
         paddleCustomerId: dbUser.paddleCustomerId,
         isSubscribed,
-        isCanceled
+        isCanceled,
+        cancelUrl
     }
 }

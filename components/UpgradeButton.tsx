@@ -52,7 +52,10 @@ const UpgradeButton = ({ userId }: UpgradeButtonProps) => {
         })
 
     return (
-        <Button onClick={() => createPaddleSession()} className="w-full">
+        <Button
+            onClick={() => createPaddleSession({ action: 'upgrade' })}
+            className="w-full"
+        >
             Upgrade now <ArrowRight className="h-5 w-5 ml-1.5" />
         </Button>
     )

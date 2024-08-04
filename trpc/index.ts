@@ -41,8 +41,7 @@ export const appRouter = router({
 
             if (!file) return { uploadStatus: 'PENDING' as const }
 
-            console.log('=== file', file);
-            
+            console.log('=== file', file)
 
             return {
                 uploadStatus: file.uploadStatus as
@@ -53,34 +52,43 @@ export const appRouter = router({
             }
         }),
 
-    createPaddleSession: privateProcedure.mutation(async ({ ctx }) => {
-        const { userId } = ctx
+    createPaddleSession: privateProcedure
+        .input(
+            z.object({
+                action: z.enum(['upgrade', 'manage'])
+            })
+        )
+        .mutation(async ({ ctx, input }) => {
+            const { userId } = ctx
+            const { action } = input
 
-        const billingUrl = absoluteUrl('/dashboard/billing')
+            const billingUrl = absoluteUrl('/dashboard/billing')
+            const manageUrl = absoluteUrl('/dashboard/manage')
 
-        if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' })
+            if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' })
 
-        const dbUser = await db.user.findFirst({
-            where: {
-                id: userId
+            const dbUser = await db.user.findFirst({
+                where: {
+                    id: userId
+                }
+            })
+
+            if (!dbUser) throw new TRPCError({ code: 'UNAUTHORIZED' })
+
+            const subscriptionPlan = await getUserSubscriptionPlan()
+
+            console.log('==== subscriptionPlan', subscriptionPlan)
+
+            if (subscriptionPlan.isSubscribed && dbUser.paddleCustomerId) {
+                if (action === 'upgrade') {
+                    return { url: billingUrl }
+                } else if (action === 'manage') {
+                    return { url: subscriptionPlan.cancelUrl }
+                }
             }
-        })
 
-        if (!dbUser) throw new TRPCError({ code: 'UNAUTHORIZED' })
-
-        const subscriptionPlan = await getUserSubscriptionPlan()
-
-        console.log('==== subscriptionPlan', subscriptionPlan)
-
-        if (subscriptionPlan.isSubscribed && dbUser.paddleCustomerId) {
-            // Paddle does not have a direct billing portal session creation like Stripe
-            // You might need to redirect users to a pre-configured billing portal URL or handle this differently
-            return { url: billingUrl }
-        }
-
-        return subscriptionPlan.isSubscribed
-        // return { url: billingUrl }
-    }),
+            return subscriptionPlan.isSubscribed
+        }),
 
     getFileMessages: privateProcedure
         .input(
