@@ -94,7 +94,8 @@ const routeHandler = async (req: NextRequest) => {
         }
 
         const event = JSON.parse(rawBody) // Parse the raw body as JSON
-        console.log('=== event', event)
+        console.log(`=== event type : ${event.event_type}, event : ${event}`)
+        
 
         // new subscription created
         if (event.event_type === 'subscription.activated') {
