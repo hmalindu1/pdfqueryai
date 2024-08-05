@@ -41,7 +41,7 @@ export const appRouter = router({
 
             if (!file) return { uploadStatus: 'PENDING' as const }
 
-            console.log('=== file', file)
+            // console.log('=== file', file)
 
             return {
                 uploadStatus: file.uploadStatus as
@@ -77,7 +77,7 @@ export const appRouter = router({
 
             const subscriptionPlan = await getUserSubscriptionPlan()
 
-            console.log('==== subscriptionPlan', subscriptionPlan)
+            // console.log('==== subscriptionPlan', subscriptionPlan)
 
             if (subscriptionPlan.isSubscribed && dbUser.paddleCustomerId) {
                 if (action === 'upgrade') {

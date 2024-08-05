@@ -94,8 +94,8 @@ const routeHandler = async (req: NextRequest) => {
         }
 
         const event = JSON.parse(rawBody) // Parse the raw body as JSON
-        console.log('=== event_type', event.event_type);
-        console.log('=== event', event)
+        // console.log('=== event_type', event.event_type);
+        // console.log('=== event', event)
         
 
         // new subscription created

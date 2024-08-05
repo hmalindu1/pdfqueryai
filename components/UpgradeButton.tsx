@@ -41,7 +41,7 @@ const UpgradeButton = ({ userId }: UpgradeButtonProps) => {
     const { mutate: createPaddleSession } =
         trpc.createPaddleSession.useMutation({
             onSuccess: (respons) => {
-                console.log('=== respons from UpgradeButton', respons)
+                // console.log('=== respons from UpgradeButton', respons)
                 if (respons === false) {
                     openCheckout()
                 }

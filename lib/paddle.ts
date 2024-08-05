@@ -6,7 +6,7 @@ import { Environment, Paddle } from '@paddle/paddle-node-sdk'
 export const paddle = new Paddle(`${process.env.PADDLE_API_KEY}`, {environment: Environment.sandbox});
 
 export async function getUserSubscriptionPlan() {
-    console.log('=== running getUserSubscriptionPlan');
+    // console.log('=== running getUserSubscriptionPlan');
     
     const { getUser } = getKindeServerSession()
     const user = await getUser()
@@ -43,7 +43,7 @@ export async function getUserSubscriptionPlan() {
             dbUser.paddleCurrentPeriodEnd.getTime() + 86_400_000 > Date.now()
     )
 
-    console.log('=== isSubscribed', isSubscribed);
+    // console.log('=== isSubscribed', isSubscribed);
     
 
     const plan = isSubscribed
@@ -52,11 +52,11 @@ export async function getUserSubscriptionPlan() {
           )
         : null
 
-        console.log('=== plan pro price ids : ',PLANS[1].price.priceIds.test);
-        console.log('=== user db price id : ', dbUser.paddlePriceId)
+        // console.log('=== plan pro price ids : ',PLANS[1].price.priceIds.test);
+        // console.log('=== user db price id : ', dbUser.paddlePriceId)
         
         
-    console.log('=== plan', plan);
+    // console.log('=== plan', plan);
 
     let isCanceled = false
     let cancelUrl
@@ -65,7 +65,7 @@ export async function getUserSubscriptionPlan() {
             const paddlePlan = await paddle.subscriptions.get(
                 dbUser.paddleSubscriptionId
             )
-            console.log('=== paddlePlan', paddlePlan);
+            // console.log('=== paddlePlan', paddlePlan);
             
             // Check if the subscription is canceled
             if (paddlePlan.canceledAt) {
@@ -82,7 +82,7 @@ export async function getUserSubscriptionPlan() {
     }
 
     // Now you can use isCanceled as needed
-    console.log('Is subscription canceled:', isCanceled)
+    // console.log('Is subscription canceled:', isCanceled)
 
 
     return {

@@ -27,7 +27,7 @@ const UserAccountNav = async ({
 }: UserAccountNavProps) => {
     const subscriptionPlan = await getUserSubscriptionPlan()
 
-    console.log('imageUrl', imageUrl);
+    // console.log('imageUrl', imageUrl);
     
 
     return (
